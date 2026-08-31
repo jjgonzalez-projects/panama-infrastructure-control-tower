@@ -1,5 +1,12 @@
 
-import streamlit as st
+import streamlit as st\nfrom pathlib import Path
+
+st.set_page_config(
+    page_title="Panama Infrastructure Delivery",
+    page_icon="📊",
+    layout="wide"
+)
+
 import pandas as pd
 import os
 from openai import OpenAI
@@ -13,7 +20,8 @@ st.set_page_config(
     layout="wide"
 )
 
-archivo = "/content/Panama_Infrastructure_Delivery_Portfolio_MVP.xlsx"
+BASE_DIR = Path(__file__).resolve().parent
+archivo = BASE_DIR / "Panama_Infrastructure_Delivery_Portfolio_MVP.xlsx"
 
 # --------------------------------
 # 2. CARGAR DATOS
@@ -136,16 +144,198 @@ def analyze_project(project_id):
 # 4. INTERFAZ
 # --------------------------------
 
-st.title("Panama Infrastructure Delivery Control Tower")
+st.markdown("""
+<div style="margin-bottom: 1.5rem;">
+<p style="font-size:13px; font-weight:700; letter-spacing:2px; color:#94A3B8; margin:0 0 8px 0;">
+PANAMA INFRASTRUCTURE DELIVERY
+</p>
+<h1 style="font-size:38px; font-weight:700; line-height:1.15; margin:0 0 8px 0;">
+Project Controls & AI Decision Support
+</h1>
+<p style="font-size:15px; color:#94A3B8; margin:0;">
+Portfolio Demonstration · Simulated Data
+</p>
+</div>
+""", unsafe_allow_html=True)
 
-st.caption(
-    "Project Controls AI Assistant | Portfolio Demonstration | Simulated Data"
+
+# --------------------------------
+# OPTIONAL USER DATA UPLOAD
+# --------------------------------
+
+st.markdown("### Data Source")
+
+uploaded_file = st.file_uploader(
+    "Upload your own Excel portfolio (optional)",
+    type=["xlsx"],
+    help="The workbook must contain Projects, Milestones, Procurement, Risks and Financials sheets."
 )
 
-project_id = st.selectbox(
-    "Select Project",
-    projects["Project ID"].tolist()
+if uploaded_file is not None:
+    try:
+        excel_data = pd.ExcelFile(uploaded_file)
+
+        required_sheets = [
+            "Projects",
+            "Milestones",
+            "Procurement",
+            "Risks",
+            "Financials"
+        ]
+
+        missing_sheets = [
+            sheet for sheet in required_sheets
+            if sheet not in excel_data.sheet_names
+        ]
+
+        if missing_sheets:
+            st.error(
+                "Missing required sheets: "
+                + ", ".join(missing_sheets)
+            )
+            st.stop()
+
+        projects = excel_data.parse("Projects")
+        milestones = excel_data.parse("Milestones")
+        procurement = excel_data.parse("Procurement")
+        risks = excel_data.parse("Risks")
+        financials = excel_data.parse("Financials")
+
+        required_columns = {
+            "Projects": [
+                "Project ID",
+                "Project Name"
+            ],
+            "Milestones": [
+                "Project ID",
+                "Status",
+                "Days Variance / Overdue"
+            ],
+            "Procurement": [
+                "Project ID",
+                "RAG",
+                "Days vs Plan"
+            ],
+            "Risks": [
+                "Project ID",
+                "Residual Score"
+            ],
+            "Financials": [
+                "Project ID",
+                "Variance %"
+            ]
+        }
+
+        dataframes = {
+            "Projects": projects,
+            "Milestones": milestones,
+            "Procurement": procurement,
+            "Risks": risks,
+            "Financials": financials
+        }
+
+        missing_columns = []
+
+        for sheet_name, required in required_columns.items():
+            available = dataframes[sheet_name].columns.tolist()
+
+            for column in required:
+                if column not in available:
+                    missing_columns.append(
+                        f"{sheet_name}: {column}"
+                    )
+
+        if missing_columns:
+            st.error(
+                "Missing required columns: "
+                + "; ".join(missing_columns)
+            )
+            st.stop()
+
+        st.success(f"✓ Portfolio successfully loaded — {len(projects)} projects analyzed")
+        st.caption(f"Source: {uploaded_file.name}")
+
+    except Exception as e:
+        st.error(f"Unable to read uploaded workbook: {e}")
+        st.stop()
+
+else:
+    st.info("Using demonstration portfolio data")
+
+
+# --------------------------------
+# PORTFOLIO OVERVIEW
+# --------------------------------
+
+portfolio_results = [
+    analyze_project(project_id)
+    for project_id in projects["Project ID"].tolist()
+]
+
+total_projects = len(portfolio_results)
+
+high_projects = sum(
+    1 for result in portfolio_results
+    if result["attention_level"] == "HIGH"
 )
+
+moderate_projects = sum(
+    1 for result in portfolio_results
+    if result["attention_level"] == "MODERATE"
+)
+
+low_projects = sum(
+    1 for result in portfolio_results
+    if result["attention_level"] == "LOW"
+)
+
+projects_with_red_procurement = sum(
+    1 for result in portfolio_results
+    if result["red_procurement_packages"] > 0
+)
+
+projects_with_overdue = sum(
+    1 for result in portfolio_results
+    if result["overdue_milestones"] > 0
+)
+
+st.markdown("### Portfolio Overview")
+
+overview_cols = st.columns(6)
+
+with overview_cols[0]:
+    st.metric("Total Projects", total_projects)
+
+with overview_cols[1]:
+    st.metric("🔴 High Attention", high_projects)
+
+with overview_cols[2]:
+    st.metric("🟠 Moderate", moderate_projects)
+
+with overview_cols[3]:
+    st.metric("🟢 Low Attention", low_projects)
+
+with overview_cols[4]:
+    st.metric("Red Procurement", projects_with_red_procurement)
+
+with overview_cols[5]:
+    st.metric("Overdue Milestones", projects_with_overdue)
+
+st.divider()
+
+
+
+project_options = {
+    f'{row["Project ID"]} · {row["Project Name"]}': row["Project ID"]
+    for _, row in projects.iterrows()
+}
+
+selected_project = st.selectbox(
+    "Project Selection",
+    list(project_options.keys())
+)
+
+project_id = project_options[selected_project]
 
 resultado = analyze_project(project_id)
 
@@ -158,76 +348,201 @@ st.subheader(project_name)
 
 
 # --------------------------------
-# 5. KPIs
+
+# --------------------------------
+# 5. KPIs - EXECUTIVE DASHBOARD
 # --------------------------------
 
-col1, col2, col3 = st.columns(3)
+# Color según Management Attention
+attention_colors = {
+    "HIGH": ("#FEE2E2", "#B91C1C", "#EF4444"),
+    "MODERATE": ("#FEF3C7", "#92400E", "#F59E0B"),
+    "LOW": ("#DCFCE7", "#166534", "#22C55E")
+}
 
-with col1:
-    st.metric(
-        "Management Attention",
-        resultado["attention_level"]
-    )
+badge_bg, badge_text, badge_dot = attention_colors[
+    resultado["attention_level"]
+]
 
-with col2:
-    st.metric(
-        "Overdue Milestones",
-        resultado["overdue_milestones"]
-    )
+# Estilos visuales
+st.markdown("""
+<style>
 
-with col3:
-    st.metric(
-        "Max Schedule Delay",
-        f'{resultado["max_schedule_delay"]} days'
-    )
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1400px;
+}
+
+.executive-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #64748B;
+    margin-bottom: 0.35rem;
+}
+
+.attention-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1.4rem;
+}
+
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 20px 22px;
+    min-height: 145px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.kpi-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #64748B;
+    margin-bottom: 10px;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.1;
+}
+
+.kpi-subtitle {
+    font-size: 0.85rem;
+    color: #64748B;
+    margin-top: 9px;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
-col4, col5, col6 = st.columns(3)
-
-with col4:
-    st.metric(
-        "Red Procurement Packages",
-        resultado["red_procurement_packages"]
-    )
-
-with col5:
-    st.metric(
-        "Financial Variance",
-        f'{resultado["financial_variance_pct"]}%'
-    )
-
-with col6:
-    st.metric(
-        "Maximum Risk Score",
-        resultado["max_risk_score"]
-    )
-
-st.write(
-    "Maximum Procurement Delay:",
-    resultado["max_procurement_delay"],
-    "days"
+# Management Attention
+st.markdown(
+    f"""
+    <div class="executive-label">PROJECT HEALTH</div>
+    <div class="attention-badge"
+         style="background:{badge_bg}; color:{badge_text};">
+        <span style="
+            width:9px;
+            height:9px;
+            border-radius:50%;
+            background:{badge_dot};
+            display:inline-block;">
+        </span>
+        {resultado["attention_level"]} MANAGEMENT ATTENTION
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
+
+# Cuatro tarjetas ejecutivas
+col_schedule, col_procurement, col_financial, col_risk = st.columns(4)
+
+with col_schedule:
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-title">SCHEDULE</div>
+            <div class="kpi-value">{resultado["max_schedule_delay"]} days</div>
+            <div class="kpi-subtitle">
+                {resultado["overdue_milestones"]} overdue milestone(s)
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col_procurement:
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-title">PROCUREMENT</div>
+            <div class="kpi-value">{resultado["red_procurement_packages"]} Red</div>
+            <div class="kpi-subtitle">
+                {resultado["max_procurement_delay"]} days maximum delay
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col_financial:
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-title">FINANCIAL</div>
+            <div class="kpi-value">{resultado["financial_variance_pct"]}%</div>
+            <div class="kpi-subtitle">
+                Forecast variance
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col_risk:
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-title">RISK</div>
+            <div class="kpi-value">{resultado["max_risk_score"]}</div>
+            <div class="kpi-subtitle">
+                Maximum residual risk score
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 st.divider()
+
 
 
 # --------------------------------
 # 6. AI EXECUTIVE BRIEF
 # --------------------------------
 
-st.subheader("AI Executive Project Brief")
+st.markdown("""
+<div style="margin-top:0.5rem;">
+<p style="font-size:12px; font-weight:700; letter-spacing:1.6px; color:#64748B; margin:0 0 6px 0;">
+AI-ASSISTED MANAGEMENT ANALYSIS
+</p>
+<h2 style="margin:0 0 6px 0;">
+Executive Project Brief
+</h2>
+<p style="color:#94A3B8; font-size:14px; margin:0 0 18px 0;">
+Generate a management-oriented interpretation using the project indicators above.
+</p>
+</div>
+""", unsafe_allow_html=True)
 
-if st.button("Generate AI Executive Brief"):
+
+if st.button(
+    "✦ Generate Executive Brief",
+    type="primary"
+):
 
     client = OpenAI(
         api_key=os.environ["OPENAI_API_KEY"]
     )
 
     prompt = f"""
-You are a Project Controls Assistant.
+You are a Project Controls Assistant supporting executive decision-making.
 
 Analyze the following infrastructure project using ONLY
-the data provided below.
+the project evidence provided below.
 
 Project ID: {resultado["project_id"]}
 Project Name: {project_name}
@@ -239,7 +554,7 @@ Maximum Procurement Delay: {resultado["max_procurement_delay"]} days
 Financial Variance: {resultado["financial_variance_pct"]}%
 Maximum Residual Risk Score: {resultado["max_risk_score"]}
 
-Provide:
+Provide exactly these sections:
 
 ## 1. Executive Summary
 
@@ -249,15 +564,49 @@ Provide:
 
 ## 4. Recommended Actions
 
-Do not invent project facts that are not supported by the data.
-Clearly distinguish facts from management interpretation.
+Requirements:
+- Use only the facts provided as project evidence.
+- Do not invent causes, contractual conditions, supplier issues,
+  technical impacts, or project circumstances not supported by the data.
+- Clearly distinguish facts from interpretation.
+- Recommendations may be proposed but must not be presented as facts.
+- Keep the response concise and executive-oriented.
 """
 
-    with st.spinner("Analyzing project..."):
+    with st.spinner(
+        "Analyzing schedule, procurement, financial and risk indicators..."
+    ):
 
         response = client.responses.create(
             model="gpt-5.6-luna",
             input=prompt
         )
 
-    st.markdown(response.output_text)
+    st.markdown("")
+
+    with st.container(border=True):
+
+        st.markdown(
+            """
+            **AI-GENERATED MANAGEMENT BRIEF**
+
+            *Based on calculated project indicators and simulated portfolio data.*
+            """
+        )
+
+        st.divider()
+
+        st.markdown(response.output_text)
+
+
+st.markdown("""
+<div style="
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+    color: #64748B;
+    font-size: 12px;
+">
+Portfolio Demonstration · Simulated Data · Python · Pandas · Streamlit · OpenAI API
+</div>
+""", unsafe_allow_html=True)
