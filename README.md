@@ -1,44 +1,74 @@
 # Panama Infrastructure Delivery Control Tower
 
-An interactive Project Controls and AI Decision Support prototype designed to demonstrate how infrastructure portfolio data can be transformed into management insights.
+An interactive **Project Controls & AI Decision Support** prototype designed to demonstrate how infrastructure portfolio data can be transformed into actionable management insights.
 
-## Live Application
-
-🚀 **[Launch the Interactive Control Tower](https://panama-infrastructure-control-tower.streamlit.app)**
-
-Explore the live prototype to select infrastructure projects, review project-control indicators, and generate AI-assisted executive management briefs.
+🚀 **[Launch the Live Application](https://panama-infrastructure-control-tower.streamlit.app)**
 
 ![Panama Infrastructure Delivery Control Tower](Captura%20-%20UN%20.png)
 
-*Interactive Project Controls & AI Decision Support prototype — simulated portfolio data.*
+> **Portfolio demonstration using simulated project data.**
 
 ## Overview
 
-The application combines structured project data with automated project controls analysis and generative AI to support management decision-making.
+The Panama Infrastructure Delivery Control Tower combines structured project data, automated project controls analysis, interactive portfolio monitoring, and generative AI in a lightweight management decision-support application.
 
-Users can select an infrastructure project and immediately review key indicators across:
-
-- Schedule performance
-- Procurement performance
-- Financial variance
-- Residual risk
-- Management attention level
-
-The application can also generate an AI-assisted Executive Project Brief based exclusively on the available project indicators.
+The tool provides both a **portfolio-level management view** and a **project-level drill-down**, allowing users to identify projects requiring attention and generate concise executive project briefs.
 
 ## Key Features
 
-- Interactive project selection
-- Project health classification
+- Upload and analyze Excel-based project portfolios
+- Automated workbook structure and column validation
+- Portfolio-level management overview
+- HIGH / MODERATE / LOW management attention classification
 - Schedule delay monitoring
-- Procurement delay monitoring
+- Procurement performance monitoring
 - Financial variance analysis
 - Residual risk monitoring
-- Management-oriented KPI dashboard
-- AI-generated Executive Project Brief
-- Guardrails to prevent unsupported project assumptions
+- Cross-project Portfolio Management View
+- Individual project drill-down
+- AI-assisted Executive Project Brief
+- Guardrails designed to prevent unsupported project assumptions
 
-## Technology
+## Portfolio Management View
+
+The application analyzes the portfolio and provides an executive overview including:
+
+- Total projects
+- Projects requiring HIGH attention
+- Projects requiring MODERATE attention
+- Projects requiring LOW attention
+- Projects with Red procurement packages
+- Projects with overdue milestones
+
+A cross-project management table allows decision-makers to compare schedule, procurement, financial, and risk indicators across the portfolio.
+
+## AI-Assisted Decision Support
+
+For each selected project, the application can generate an **Executive Project Brief** using the available project-control indicators.
+
+The AI layer is intentionally separated from the calculation layer:
+
+**Python calculates the indicators and management rules first. Generative AI then interprets and communicates those structured results.**
+
+The prompt includes guardrails requiring the model to distinguish evidence from interpretation and avoid inventing unsupported causes, contractual impacts, technical issues, or supplier problems.
+
+## Architecture
+
+Excel Portfolio  
+↓  
+Pandas Data Processing  
+↓  
+Project Controls Rules & KPI Calculation  
+↓  
+Portfolio Management Analysis  
+↓  
+Streamlit Interactive Dashboard  
+↓  
+OpenAI API  
+↓  
+AI-Assisted Executive Project Brief
+
+## Technology Stack
 
 - Python
 - Pandas
@@ -46,11 +76,24 @@ The application can also generate an AI-assisted Executive Project Brief based e
 - OpenPyXL
 - OpenAI API
 - Excel
+- GitHub
+- Streamlit Community Cloud
 
-## Data
+## Demonstration Data
 
-The portfolio dataset used in this demonstration is simulated and does not represent actual projects.
+This application uses a **simulated infrastructure project portfolio created specifically for this demonstration**.
+
+The dataset contains 12 fictional infrastructure projects and was designed to simulate realistic project-control scenarios across schedule, procurement, financial performance, and residual risk.
+
+The data does **not represent actual projects, organizations, contractors, suppliers, budgets, or operational information**.
+
+The simulated portfolio is used exclusively to demonstrate the application's analytical workflow, management-attention logic, portfolio monitoring capabilities, and AI-assisted decision support.
+
+Users may also upload their own compatible Excel workbook to test the application with a different portfolio structure.
+
 
 ## Purpose
 
-This prototype was developed as a portfolio demonstration of how Project Management, Project Controls, Data Analytics and Generative AI can be integrated into a lightweight decision-support tool.
+This prototype was developed as a portfolio demonstration of how **Project Management, Project Controls, Procurement, Risk Management, Data Analytics, and Generative AI** can be integrated into a practical decision-support workflow.
+
+The project demonstrates the progression from structured portfolio data to management-level insights while maintaining a clear separation between deterministic calculations and AI-assisted interpretation.
