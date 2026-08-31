@@ -2,6 +2,16 @@
 
 An interactive Project Controls and AI Decision Support prototype designed to demonstrate how infrastructure portfolio data can be transformed into management insights.
 
+## Live Application
+
+🚀 **[Launch the Interactive Control Tower](https://panama-infrastructure-control-tower.streamlit.app)**
+
+Explore the live prototype to select infrastructure projects, review project-control indicators, and generate AI-assisted executive management briefs.
+
+![Panama Infrastructure Delivery Control Tower](Captura%20-%20UN%20.png)
+
+*Interactive Project Controls & AI Decision Support prototype — simulated portfolio data.*
+
 ## Overview
 
 The application combines structured project data with automated project controls analysis and generative AI to support management decision-making.
