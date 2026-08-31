@@ -158,7 +158,27 @@ Portfolio Demonstration · Simulated Data
 </p>
 </div>
 """, unsafe_allow_html=True)
+with st.expander("ℹ️ About this Project & How to Use"):
+    st.markdown("""
+### About this Project
 
+This interactive prototype demonstrates how infrastructure portfolio data can be transformed into management-level insights using **Python, project-control rules, data analytics, and generative AI**.
+
+The application includes **12 simulated infrastructure projects** created exclusively for this portfolio demonstration. The data does not represent real projects, organizations, contractors, suppliers, or budgets.
+
+### How to Use
+
+1. Explore the **demonstration portfolio** already loaded in the application.
+2. Review the **Portfolio Overview** to identify projects requiring management attention.
+3. Use the **Portfolio Management View** to compare projects across schedule, procurement, financial performance, and risk.
+4. Select an individual project for detailed project-controls analysis.
+5. Generate an **AI-assisted Executive Project Brief** based on the calculated project facts.
+
+You may also upload a compatible Excel portfolio to test the analytical workflow with a different dataset.
+
+**Required workbook sheets:**  
+Projects · Milestones · Procurement · Risks · Financials
+""")
 
 # --------------------------------
 # OPTIONAL USER DATA UPLOAD
