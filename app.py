@@ -326,6 +326,96 @@ st.divider()
 
 
 
+
+# --------------------------------
+# PORTFOLIO MANAGEMENT VIEW
+# --------------------------------
+
+st.markdown("### Portfolio Management View")
+
+portfolio_table = pd.DataFrame(portfolio_results)
+
+portfolio_names = projects[
+    ["Project ID", "Project Name"]
+].copy()
+
+portfolio_table = portfolio_table.merge(
+    portfolio_names,
+    left_on="project_id",
+    right_on="Project ID",
+    how="left"
+)
+
+portfolio_table = portfolio_table[
+    [
+        "Project ID",
+        "Project Name",
+        "attention_level",
+        "overdue_milestones",
+        "max_schedule_delay",
+        "red_procurement_packages",
+        "max_procurement_delay",
+        "financial_variance_pct",
+        "max_risk_score"
+    ]
+]
+
+portfolio_table.columns = [
+    "Project ID",
+    "Project Name",
+    "Attention",
+    "Overdue Milestones",
+    "Schedule Delay",
+    "Red Procurement",
+    "Procurement Delay",
+    "Financial Variance %",
+    "Risk Score"
+]
+
+attention_order = {
+    "HIGH": 1,
+    "MODERATE": 2,
+    "LOW": 3
+}
+
+portfolio_table["Attention Order"] = (
+    portfolio_table["Attention"].map(attention_order)
+)
+
+portfolio_table = (
+    portfolio_table
+    .sort_values(
+        by=["Attention Order", "Risk Score"],
+        ascending=[True, False]
+    )
+    .drop(columns=["Attention Order"])
+)
+
+def highlight_attention(value):
+    if value == "HIGH":
+        return "background-color: #FEE2E2; color: #B91C1C; font-weight: 700;"
+    elif value == "MODERATE":
+        return "background-color: #FEF3C7; color: #92400E; font-weight: 700;"
+    elif value == "LOW":
+        return "background-color: #DCFCE7; color: #166534; font-weight: 700;"
+    return ""
+
+styled_portfolio_table = (
+    portfolio_table.style
+    .map(
+        highlight_attention,
+        subset=["Attention"]
+    )
+)
+
+st.dataframe(
+    styled_portfolio_table,
+    use_container_width=True,
+    hide_index=True
+)
+
+st.divider()
+
 project_options = {
     f'{row["Project ID"]} · {row["Project Name"]}': row["Project ID"]
     for _, row in projects.iterrows()
