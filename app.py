@@ -406,6 +406,9 @@ styled_portfolio_table = (
         highlight_attention,
         subset=["Attention"]
     )
+    .format({
+        "Financial Variance %": "{:.2f}%"
+    })
 )
 
 st.dataframe(
