@@ -731,6 +731,12 @@ st.markdown("""
     color: #64748B;
     font-size: 12px;
 ">
-Portfolio Demonstration · Simulated Data · Python · Pandas · Streamlit · OpenAI API
+    Portfolio Demonstration · Simulated Data · Python · Pandas · Streamlit · OpenAI API
+    <br><br>
+    <a href="https://github.com/jjgonzalez-projects/panama-infrastructure-control-tower"
+       target="_blank"
+       style="color:#64748B; text-decoration:none; font-weight:600;">
+       View Source Code & Project Documentation →
+    </a>
 </div>
 """, unsafe_allow_html=True)
