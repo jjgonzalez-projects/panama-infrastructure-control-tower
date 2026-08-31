@@ -738,5 +738,12 @@ st.markdown("""
        style="color:#64748B; text-decoration:none; font-weight:600;">
        View Source Code & Project Documentation →
     </a>
+    <span style="margin:0 10px;">·</span>
+
+<a href="https://www.linkedin.com/in/juanjosegonzalezrios"
+   target="_blank"
+   style="color:#64748B; text-decoration:none; font-weight:600;">
+   Connect on LinkedIn →
+</a>
 </div>
 """, unsafe_allow_html=True)
