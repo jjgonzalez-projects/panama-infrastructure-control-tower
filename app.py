@@ -185,7 +185,17 @@ Projects · Milestones · Procurement · Risks · Financials
 # --------------------------------
 
 st.markdown("### Data Source")
+st.caption(
+    "Explore the demonstration data below or upload your own compatible Excel portfolio."
+)
 
+with open(archivo, "rb") as sample_file:
+    st.download_button(
+        label="⬇ Download Sample Portfolio",
+        data=sample_file,
+        file_name="Panama_Infrastructure_Delivery_Sample.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 uploaded_file = st.file_uploader(
     "Upload your own Excel portfolio (optional)",
     type=["xlsx"],
