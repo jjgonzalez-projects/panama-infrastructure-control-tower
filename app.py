@@ -524,37 +524,20 @@ for _, row in portfolio_table.iterrows():
 
     bg_color, text_color = mobile_colors[row["Attention"]]
 
-    mobile_cards += f"""
-    <div class="mobile-project-card">
+    mobile_cards += f"""<div class="mobile-project-card">
+<div class="mobile-project-top">
+<div class="mobile-project-id">{row["Project ID"]}</div>
+<div class="mobile-attention" style="background:{bg_color}; color:{text_color};">{row["Attention"]}</div>
+</div>
 
-        <div class="mobile-project-top">
-            <div class="mobile-project-id">
-                {row["Project ID"]}
-            </div>
+<div class="mobile-project-name">{row["Project Name"]}</div>
 
-            <div class="mobile-attention"
-                 style="background:{bg_color}; color:{text_color};">
-                {row["Attention"]}
-            </div>
-        </div>
-
-        <div class="mobile-project-name">
-            {row["Project Name"]}
-        </div>
-
-        <div class="mobile-project-metrics">
-            <strong>Schedule:</strong> {row["Schedule Delay"]} days
-            · {row["Overdue Milestones"]} overdue<br>
-
-            <strong>Procurement:</strong> {row["Red Procurement"]} Red
-            · {row["Procurement Delay"]} days delay<br>
-
-            <strong>Financial:</strong> {row["Financial Variance %"]:.2f}%
-            · <strong>Risk:</strong> {row["Risk Score"]}
-        </div>
-
-    </div>
-    """
+<div class="mobile-project-metrics">
+<strong>Schedule:</strong> {row["Schedule Delay"]} days · {row["Overdue Milestones"]} overdue<br>
+<strong>Procurement:</strong> {row["Red Procurement"]} Red · {row["Procurement Delay"]} days delay<br>
+<strong>Financial:</strong> {row["Financial Variance %"]:.2f}% · <strong>Risk:</strong> {row["Risk Score"]}
+</div>
+</div>"""
 
 mobile_cards += "</div>"
 
