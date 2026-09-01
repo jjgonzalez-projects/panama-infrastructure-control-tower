@@ -440,7 +440,128 @@ styled_portfolio_table = (
         "Financial Variance %": "{:.2f}%"
     })
 )
+# --------------------------------
+# MOBILE PORTFOLIO VIEW
+# --------------------------------
 
+st.markdown("""
+<style>
+
+/* Desktop: hide mobile cards */
+.mobile-portfolio-view {
+    display: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    /* Hide the wide Streamlit dataframe */
+    [data-testid="stDataFrame"] {
+        display: none;
+    }
+
+    /* Show compact mobile cards */
+    .mobile-portfolio-view {
+        display: block;
+    }
+
+    .mobile-project-card {
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+
+    .mobile-project-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .mobile-project-id {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .mobile-project-name {
+        font-size: 16px;
+        font-weight: 650;
+        margin-bottom: 10px;
+        line-height: 1.3;
+    }
+
+    .mobile-project-metrics {
+        font-size: 13px;
+        line-height: 1.7;
+        opacity: 0.85;
+    }
+
+    .mobile-attention {
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+mobile_cards = '<div class="mobile-portfolio-view">'
+
+mobile_colors = {
+    "HIGH": ("#FEE2E2", "#B91C1C"),
+    "MODERATE": ("#FEF3C7", "#92400E"),
+    "LOW": ("#DCFCE7", "#166534")
+}
+
+for _, row in portfolio_table.iterrows():
+
+    bg_color, text_color = mobile_colors[row["Attention"]]
+
+    mobile_cards += f"""
+    <div class="mobile-project-card">
+
+        <div class="mobile-project-top">
+            <div class="mobile-project-id">
+                {row["Project ID"]}
+            </div>
+
+            <div class="mobile-attention"
+                 style="background:{bg_color}; color:{text_color};">
+                {row["Attention"]}
+            </div>
+        </div>
+
+        <div class="mobile-project-name">
+            {row["Project Name"]}
+        </div>
+
+        <div class="mobile-project-metrics">
+            <strong>Schedule:</strong> {row["Schedule Delay"]} days
+            · {row["Overdue Milestones"]} overdue<br>
+
+            <strong>Procurement:</strong> {row["Red Procurement"]} Red
+            · {row["Procurement Delay"]} days delay<br>
+
+            <strong>Financial:</strong> {row["Financial Variance %"]:.2f}%
+            · <strong>Risk:</strong> {row["Risk Score"]}
+        </div>
+
+    </div>
+    """
+
+mobile_cards += "</div>"
+
+st.markdown(
+    mobile_cards,
+    unsafe_allow_html=True
+)
 st.dataframe(
     styled_portfolio_table,
     use_container_width=True,
